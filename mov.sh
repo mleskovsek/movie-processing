@@ -1,0 +1,3 @@
+find . -mindepth 2 -maxdepth 2 -type f ! \( -iname "*.mp4" -o -iname "*.mkv" -o -iname "*.mov" -o -iname "*.avi" \) -exec sh -c 'out="processed/${1#./}"; mkdir -p "$(dirname "$out")"; cp "$1" "$out"' _ {} \;
+
+find . -mindepth 2 -maxdepth 2 -type f \( -iname "*.mp4" -o -iname "*.mkv" -o -iname "*.mov" -o -iname "*.avi" \) -exec sh -c 'out="processed/${1#./}"; mkdir -p "$(dirname "$out")"; ffmpeg -i "$1" -vf scale=854:-2 -af "highpass=f=100,equalizer=f=2500:t=q:w=1:g=6,equalizer=f=4000:t=q:w=1:g=5,acompressor=threshold=-22dB:ratio=4:attack=15:release=200:makeup=6,pan=mono|c0=0.5*c0+0.5*c1,loudnorm=I=-11:TP=-1.0:LRA=5" -c:v libx264 -profile:v high -level 4.0 -pix_fmt yuv420p -crf 28 -preset veryfast -c:a aac -b:a 128k "${out%.*}.mp4"' _ {} \;
